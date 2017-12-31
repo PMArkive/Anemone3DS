@@ -30,6 +30,7 @@
 #include "common.h"
 #include "loading.h"
 #include "colors.h"
+#include "controls.h"
 
 typedef enum {
     INSTALL_LOADING_THEMES,
@@ -55,29 +56,6 @@ typedef enum {
     ERROR_LEVEL_WARNING,
 } ErrorLevel;
 
-#define BUTTONS_START_Y 130
-#define BUTTONS_STEP 22
-#define BUTTONS_INFO_LINES 4
-#define BUTTONS_INFO_COLUNMNS 2
-
-enum {
-    BUTTONS_Y_INFO = BUTTONS_START_Y+5,
-
-    BUTTONS_Y_LINE_1 = BUTTONS_START_Y + BUTTONS_STEP*1,
-    BUTTONS_Y_LINE_2 = BUTTONS_START_Y + BUTTONS_STEP*2,
-    BUTTONS_Y_LINE_3 = BUTTONS_START_Y + BUTTONS_STEP*3,
-    BUTTONS_Y_LINE_4 = BUTTONS_START_Y + BUTTONS_STEP*4,
-
-    BUTTONS_X_LEFT = 20,
-    BUTTONS_X_RIGHT = 200,
-} ButtonPos;
-
-typedef struct {
-    const wchar_t * info_line;
-    Color info_line_color;
-    const wchar_t * instructions[BUTTONS_INFO_LINES][BUTTONS_INFO_COLUNMNS];
-} Instructions_s;
-
 void init_screens(void);
 void exit_screens(void);
 
@@ -89,6 +67,6 @@ void draw_preview(int preview_offset);
 void draw_install(InstallType type);
 
 void draw_base_interface(void);
-void draw_interface(Entry_List_s* list, Instructions_s instructions);
+void draw_interface(Entry_List_s* list, Button_s * controls);
 
 #endif

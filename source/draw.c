@@ -153,8 +153,8 @@ bool draw_confirm(const char* conf_msg, Entry_List_s* list)
 {
     while(aptMainLoop())
     {
-        Instructions_s instructions = {0};
-        draw_interface(list, instructions);
+        Button_s * controls = NULL;
+        draw_interface(list, controls);
         pp2d_draw_on(GFX_TOP, GFX_LEFT);
         draw_text_center(GFX_TOP, BUTTONS_Y_LINE_1, 0.7, 0.7, COLOR_YELLOW, conf_msg);
         pp2d_draw_wtext_center(GFX_TOP, BUTTONS_Y_LINE_3, 0.6, 0.6, COLOR_WHITE, L"\uE000 Yes   \uE001 No");
@@ -221,43 +221,35 @@ void draw_install(InstallType type)
     pp2d_end_draw();
 }
 
-static void draw_instructions(Instructions_s instructions)
+static void draw_controls(Button_s * controls)
 {
     pp2d_draw_on(GFX_TOP, GFX_LEFT);
 
-    if(instructions.info_line != NULL)
-        pp2d_draw_wtext_center(GFX_TOP, BUTTONS_Y_INFO, 0.55, 0.55, instructions.info_line_color, instructions.info_line);
+    if(controls == NULL) return;
 
-    const int y_lines[BUTTONS_INFO_LINES-1] = {
-        BUTTONS_Y_LINE_1,
-        BUTTONS_Y_LINE_2,
-        BUTTONS_Y_LINE_3,
-    };
-
-    for(int i = 0; i < BUTTONS_INFO_LINES-1; i++)
+    for(int i = 0; i < BUTTONS_AMOUNT; i++)
     {
-        if(instructions.instructions[i][0] != NULL)
-            pp2d_draw_wtext(BUTTONS_X_LEFT, y_lines[i], 0.6, 0.6, COLOR_WHITE, instructions.instructions[i][0]);
-        if(instructions.instructions[i][1] != NULL)
-            pp2d_draw_wtext(BUTTONS_X_RIGHT, y_lines[i], 0.6, 0.6, COLOR_WHITE, instructions.instructions[i][1]);
-    }
+        Button_s button = controls[i];
+        if(button.button_info != NULL)
+        {
+            if(button.y_pos == BUTTONS_Y_LINE_4)
+            {
+                if(button.x_pos == BUTTONS_X_LEFT)
+                    pp2d_draw_texture(TEXTURE_START_BUTTON, BUTTONS_X_LEFT-10, BUTTONS_Y_LINE_4 + 3);
+                if(button.x_pos == BUTTONS_X_RIGHT)
+                    pp2d_draw_texture(TEXTURE_SELECT_BUTTON, BUTTONS_X_RIGHT-10, BUTTONS_Y_LINE_4 + 3);
 
-    const wchar_t * start_line = instructions.instructions[BUTTONS_INFO_LINES-1][0];
-    if(start_line != NULL)
-    {
-        pp2d_draw_texture(TEXTURE_START_BUTTON, BUTTONS_X_LEFT-10, BUTTONS_Y_LINE_4 + 3);
-        pp2d_draw_wtext(BUTTONS_X_LEFT+26, BUTTONS_Y_LINE_4, 0.6, 0.6, COLOR_WHITE, start_line);
-    }
-
-    const wchar_t * select_line = instructions.instructions[BUTTONS_INFO_LINES-1][1];
-    if(select_line != NULL)
-    {
-        pp2d_draw_texture(TEXTURE_SELECT_BUTTON, BUTTONS_X_RIGHT-10, BUTTONS_Y_LINE_4 + 3);
-        pp2d_draw_wtext(BUTTONS_X_RIGHT+26, BUTTONS_Y_LINE_4, 0.6, 0.6, COLOR_WHITE, select_line);
+                pp2d_draw_wtext(button.x_pos+26, button.y_pos, 0.6, 0.6, COLOR_WHITE, button.button_info);
+            }
+            else
+            {
+                pp2d_draw_wtext(button.x_pos, button.y_pos, 0.6, 0.6, COLOR_WHITE, button.button_info);
+            }
+        }
     }
 }
 
-void draw_interface(Entry_List_s* list, Instructions_s instructions)
+void draw_interface(Entry_List_s* list, Button_s * controls)
 {
     draw_base_interface();
     EntryMode current_mode = list->mode;
@@ -290,7 +282,7 @@ void draw_interface(Entry_List_s* list, Instructions_s instructions)
         return;
     }
 
-    draw_instructions(instructions);
+    draw_controls(controls);
 
     int selected_entry = list->selected_entry;
     Entry_s current_entry = list->entries[selected_entry];

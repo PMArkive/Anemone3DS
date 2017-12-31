@@ -24,59 +24,44 @@
 *         reasonable ways as different from the original version.
 */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef CONTROLS_H
+#define CONTROLS_H
 
-#include <3ds.h>
+#include "common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define ENTRIES_PER_SCREEN 4
-
-#define DEBUG(...) fprintf(stderr, __VA_ARGS__)
-#define POS() DEBUG("%s (line %d)...\n", __func__, __LINE__)
-
-#define DEBUGPOS(...) \
-        POS(); \
-        DEBUG(__VA_ARGS__)
+#define BUTTONS_START_Y 130
+#define BUTTONS_STEP 22
+#define BUTTONS_INFO_LINES 4
+#define BUTTONS_INFO_COLUNMNS 2
 
 typedef enum {
-    MODE_THEMES,
-    MODE_SPLASHES,
+    BUTTONS_Y_INFO = BUTTONS_START_Y+5,
 
-    LIST_AMOUNT,
+    BUTTONS_Y_LINE_1 = BUTTONS_START_Y + BUTTONS_STEP*1,
+    BUTTONS_Y_LINE_2 = BUTTONS_START_Y + BUTTONS_STEP*2,
+    BUTTONS_Y_LINE_3 = BUTTONS_START_Y + BUTTONS_STEP*3,
+    BUTTONS_Y_LINE_4 = BUTTONS_START_Y + BUTTONS_STEP*4,
 
-    MODE_INSTALL_THEMES = LIST_AMOUNT,
-    MODE_PREVIEW,
+    BUTTONS_X_LEFT = 20,
+    BUTTONS_X_RIGHT = 200,
+} ButtonPos;
 
-    MODE_AMOUNT
-} EntryMode;
+// A, B, X, Y
+// L, R
+// Start, Select
+// D-Left, D-Right, D-Up, D-Down
+// C-Left, C-Right, C-Up, C-Down
+// Touch
+#define BUTTONS_AMOUNT 17
 
-extern const char * main_paths[LIST_AMOUNT];
-
-enum TextureID {
-    TEXTURE_FONT_RESERVED = 0, // used by pp2d for the font
-    TEXTURE_ARROW,
-    TEXTURE_SHUFFLE,
-    TEXTURE_INSTALLED,
-    TEXTURE_PREVIEW_ICON,
-    TEXTURE_DOWNLOAD,
-    TEXTURE_RELOAD,
-    TEXTURE_BATTERY_0,
-    TEXTURE_BATTERY_1,
-    TEXTURE_BATTERY_2,
-    TEXTURE_BATTERY_3,
-    TEXTURE_BATTERY_4,
-    TEXTURE_BATTERY_5,
-    TEXTURE_BATTERY_CHARGE,
-    TEXTURE_QR,
-    TEXTURE_PREVIEW,
-    TEXTURE_SELECT_BUTTON,
-    TEXTURE_START_BUTTON,
-
-    TEXTURE_ICON, // always the last
-};
+typedef struct {
+    const wchar_t * button_info;
+    void (*function)(void * void_arg);
+    void * arg;
+    ButtonPos x_pos;
+    ButtonPos y_pos;
+    u32 key;
+    u32 * pressed_check;
+} Button_s;
 
 #endif
