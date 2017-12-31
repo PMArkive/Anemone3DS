@@ -140,7 +140,7 @@ int main(void)
     Button_s base_modes_buttons[MODE_AMOUNT][BUTTONS_AMOUNT] = {
         { // theme mode
             {
-                L"\uE000 Hold to install",
+                L"\uE000 Select how to install",
                 change_to_theme_install_mode,
                 NULL,
                 BUTTONS_X_LEFT,
@@ -462,10 +462,10 @@ int main(void)
             {L"\uE000 Go back", exit_theme_install_mode, &current_list, BUTTONS_X_LEFT, BUTTONS_Y_LINE_1, KEY_A, &kDown},
             {L"\uE001 Go back", exit_theme_install_mode, &current_list, BUTTONS_X_RIGHT, BUTTONS_Y_LINE_1, KEY_B, &kDown},
 
-            {L"\uE079 Normal install", do_install_theme, &current_list, BUTTONS_X_LEFT, BUTTONS_Y_LINE_2, KEY_UP, &kDown},
-            {L"\uE07A Shuffle install", do_install_shuffle_themes, &current_list, BUTTONS_X_RIGHT, BUTTONS_Y_LINE_2, KEY_DOWN, &kDown},
-            {L"\uE07B BGM-only install", do_install_theme_bgm_only, &current_list, BUTTONS_X_LEFT, BUTTONS_Y_LINE_3, KEY_LEFT, &kDown},
-            {L"\uE07C No-BGM install", do_install_theme_no_bgm, &current_list, BUTTONS_X_RIGHT, BUTTONS_Y_LINE_3, KEY_RIGHT, &kDown},
+            {L"\uE079 Normal install", do_install_theme, &current_list, BUTTONS_X_LEFT, BUTTONS_Y_LINE_2, KEY_DUP, &kDown},
+            {L"\uE07A Shuffle install", do_install_shuffle_themes, &current_list, BUTTONS_X_RIGHT, BUTTONS_Y_LINE_2, KEY_DDOWN, &kDown},
+            {L"\uE07B BGM-only install", do_install_theme_bgm_only, &current_list, BUTTONS_X_LEFT, BUTTONS_Y_LINE_3, KEY_DLEFT, &kDown},
+            {L"\uE07C No-BGM install", do_install_theme_no_bgm, &current_list, BUTTONS_X_RIGHT, BUTTONS_Y_LINE_3, KEY_DRIGHT, &kDown},
         },
         { // preview mode
             {NULL, exit_preview_mode, NULL, 0, 0, KEY_A, &kDown},
