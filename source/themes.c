@@ -260,6 +260,171 @@ inline Result shuffle_install(Entry_List_s themes)
     return install_theme_internal(themes, THEME_INSTALL_SHUFFLE | THEME_INSTALL_BODY | THEME_INSTALL_BGM);
 }
 
+Result dump_installed_theme(void)
+{
+    char* savedata_buf = NULL;
+    u32 savedata_size = file_to_buf(fsMakePath(PATH_ASCII, "/SaveData.dat"), ArchiveHomeExt, &savedata_buf);
+    if(!savedata_size) return -1;
+    SaveData_dat_s* savedata = (SaveData_dat_s*)savedata_buf;
+    bool shuffle = savedata->shuffle;
+    free(savedata_buf);
+
+    char* thememanage_buf = NULL;
+    u32 theme_manage_size = file_to_buf(fsMakePath(PATH_ASCII, "/ThemeManage.bin"), ArchiveThemeExt, &thememanage_buf);
+    if(!theme_manage_size) return -1;
+    ThemeManage_bin_s * theme_manage = (ThemeManage_bin_s *)thememanage_buf;
+
+    u32 single_body_size = theme_manage->body_size;
+    u32 single_bgm_size = theme_manage->body_size;
+    u32 shuffle_body_sizes[MAX_SHUFFLE_THEMES] = {0};
+    u32 shuffle_music_sizes[MAX_SHUFFLE_THEMES] = {0};
+    memcpy(shuffle_body_sizes, theme_manage->shuffle_body_sizes, sizeof(u32)*MAX_SHUFFLE_THEMES);
+    memcpy(shuffle_music_sizes, theme_manage->shuffle_music_sizes, sizeof(u32)*MAX_SHUFFLE_THEMES);
+    free(thememanage_buf);
+
+    Result res = 0;
+
+    Handle body_cache_handle;
+    if(shuffle)
+        FSUSER_OpenFile(&body_cache_handle, ArchiveThemeExt, fsMakePath(PATH_ASCII, "/BodyCache_rd.bin"), FS_OPEN_READ, 0);
+
+    for(int i = 0; i < MAX_SHUFFLE_THEMES; i++)
+    {
+        char * folder_path = NULL;
+        char * smdh_path = NULL;
+        char * smdh_desc = NULL;
+
+        smdh_desc = calloc(0xFF, sizeof(char));
+        if(smdh_desc == NULL) goto end;
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+        const char * day_notifier[] = {"th","st","nd","rd","th","th","th","th","th","th",};
+        char format[0xFF] = {0};
+        sprintf(format, "Dumped at %%T on %%d%s %%b %%Y", day_notifier[tm.tm_mday % 10]);
+        strftime(smdh_desc, 0xFF, format, &tm);
+
+        sprintf(format, "%sDumped on %%4.4i-%%2.2i-%%2.2i at %%2.2i-%%2.2i-%%2.2i", main_paths[MODE_THEMES]);
+        folder_path = calloc(0xFF, sizeof(char));
+        snprintf(folder_path, 0xFF, format, tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+        if(shuffle)
+            snprintf(folder_path, 0xFF, "%s_%i", folder_path, i);
+
+        DEBUG("path: %s\n", folder_path);
+
+        res = FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, folder_path), 0);
+        if(R_FAILED(res))
+        {
+            throw_error("Failed to create the folder to\nhold the dumped theme.", ERROR_LEVEL_WARNING);
+            goto end;
+        }
+
+        /*
+        Gettin the body_lz and bgm.bcstm here
+        */
+        if(shuffle)
+        {
+            u32 body_size = shuffle_body_sizes[i];
+            if(body_size)
+            {
+                char * body = NULL;
+                char * body_path = NULL;
+                res = (Result)asprintf(&body_path, "%s/body_LZ.bin", folder_path);
+                if(res == -1) goto end;
+
+                body = calloc(body_size, sizeof(char));
+                FSFILE_Read(body_cache_handle, NULL, BODY_CACHE_SIZE * i, (u8*)body, body_size);
+
+                remake_file(body_path, ArchiveSD, body_size);
+                buf_to_file(body_size, body_path, ArchiveSD, body);
+
+                free(body);
+                free(body_path);
+            }
+
+            u32 bgm_size = shuffle_music_sizes[i];
+            if(bgm_size)
+            {
+                char * bgm = NULL;
+                char * bgm_path = NULL;
+                res = (Result)asprintf(&bgm_path, "%s/bgm.bcstm", folder_path);
+                if(res == -1) goto end;
+
+                char installed_bgm_path[26] = {0};
+                sprintf(installed_bgm_path, "/BgmCache.bin_%.2i", i);
+
+                file_to_buf(fsMakePath(PATH_ASCII, "/BgmCache.bin"), ArchiveThemeExt, &bgm);
+
+                remake_file(bgm_path, ArchiveSD, bgm_size);
+                buf_to_file(bgm_size, bgm_path, ArchiveSD, bgm);
+
+                free(bgm_path);
+                free(bgm);
+            }
+        }
+        else
+        {
+            char * body = NULL;
+            char * body_path = NULL;
+            res = (Result)asprintf(&body_path, "%s/BodyCache.bin", folder_path);
+            if(res == -1) goto end;
+
+            u32 body_size = file_to_buf(fsMakePath(PATH_ASCII, "/BodyCache.bin"), ArchiveThemeExt, &body);
+            if(body_size == single_body_size)
+            {
+                remake_file(body_path, ArchiveSD, body_size);
+                buf_to_file(body_size, body_path, ArchiveSD, body);
+            }
+            free(body);
+
+            char * bgm = NULL;
+            char * bgm_path = NULL;
+            res = (Result)asprintf(&bgm_path, "%s/BgmCache.bin", folder_path);
+            if(res == -1) goto end;
+
+            u32 bgm_size = file_to_buf(fsMakePath(PATH_ASCII, "/BgmCache.bin"), ArchiveThemeExt, &bgm);
+            if(bgm_size == single_bgm_size)
+            {
+                remake_file(bgm_path, ArchiveSD, bgm_size);
+                buf_to_file(bgm_size, bgm_path, ArchiveSD, bgm);
+            }
+            free(bgm);
+        }
+
+
+        res = (Result)asprintf(&smdh_path, "%s/info.smdh", folder_path);
+        if(res == -1) goto end;
+
+        Icon_s smdh = {0};
+        struacat(smdh.name, "Dumped theme");
+        struacat(smdh.author, "Unkown author");
+        struacat(smdh.desc, smdh_desc);
+
+        u32 color = RGB565(rand() % 255, rand() % 255, rand() % 255);
+        for(int i = 0; i < 48*48; i++)
+        {
+            smdh.big_icon[i] = color;
+        }
+
+        remake_file(smdh_path, ArchiveSD, sizeof(Icon_s));
+        buf_to_file(sizeof(Icon_s), smdh_path, ArchiveSD, (char*)&smdh);
+
+        res = 0;
+
+        end:
+        free(folder_path);
+        free(smdh_path);
+        free(smdh_desc);
+
+        if(!shuffle)
+            break;
+    }
+
+    FSFILE_Close(body_cache_handle);
+
+    return res;
+}
+
 void themes_check_installed(void * void_arg)
 {
     Thread_Arg_s * arg = (Thread_Arg_s *)void_arg;

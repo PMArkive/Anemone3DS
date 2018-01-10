@@ -33,6 +33,8 @@
 void splash_delete(void);
 void splash_install(Entry_s splash);
 
+Result dump_installed_splash(void);
+
 void splash_check_installed(void * void_arg);
 
 #endif

@@ -533,10 +533,16 @@ int main(void)
             switch(current_mode)
             {
                 case MODE_THEMES:
-                    load_icons_first(current_list, false);
+                    if(R_SUCCEEDED(dump_installed_theme()))
+                    {
+                        load_lists(lists);
+                    }
                     break;
                 case MODE_SPLASHES:
-                    load_icons_first(current_list, false);
+                    if(R_SUCCEEDED(dump_installed_splash()))
+                    {
+                        load_lists(lists);
+                    }
                     break;
                 default:
                     break;

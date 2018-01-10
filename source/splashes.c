@@ -71,6 +71,99 @@ void splash_install(Entry_s splash)
     }
 }
 
+Result dump_installed_splash(void)
+{
+    char * top_buf = NULL;
+    char * folder_path = NULL;
+    char * smdh_path = NULL;
+    char * smdh_desc = NULL;
+    char * splash_top_path = NULL;
+    char * bottom_buf = NULL;
+    char * splash_bottom_path = NULL;
+
+    u32 top_size = file_to_buf(fsMakePath(PATH_ASCII, "/luma/splash.bin"), ArchiveSD, &top_buf);
+    u32 bottom_size = file_to_buf(fsMakePath(PATH_ASCII, "/luma/splashbottom.bin"), ArchiveSD, &bottom_buf);
+
+    Result res = 0;
+
+    if(!bottom_size && !top_size)
+    {
+        throw_error("No splash currently installed to dump", ERROR_LEVEL_WARNING);
+        res = -1;
+        goto end;
+    }
+
+    smdh_desc = calloc(0xFF, sizeof(char));
+    if(smdh_desc == NULL) goto end;
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    const char * day_notifier[] = {"th","st","nd","rd","th","th","th","th","th","th",};
+    char format[0xFF] = {0};
+    sprintf(format, "Dumped at %%T on %%d%s %%b %%Y", day_notifier[tm.tm_mday % 10]);
+    strftime(smdh_desc, 0xFF, format, &tm);
+
+    sprintf(format, "%sDumped on %%4.4i-%%2.2i-%%2.2i at %%2.2i-%%2.2i-%%2.2i", main_paths[MODE_SPLASHES]);
+    res = (Result)asprintf(&folder_path, format,  tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    if(res == -1) goto end;
+
+    DEBUG("path: %s\n", folder_path);
+
+    res = FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, folder_path), 0);
+    if(R_FAILED(res))
+    {
+        throw_error("Failed to create the folder to\nhold the dumped splash.", ERROR_LEVEL_WARNING);
+        goto end;
+    }
+
+    res = (Result)asprintf(&splash_top_path, "%s/splash.bin", folder_path);
+    if(res == -1) goto end;
+
+    res = (Result)asprintf(&splash_bottom_path, "%s/splashbottom.bin", folder_path);
+    if(res == -1) goto end;
+
+    if(top_size)
+    {
+        remake_file(splash_top_path, ArchiveSD, top_size);
+        buf_to_file(top_size, splash_top_path, ArchiveSD, top_buf);
+    }
+    if(bottom_size)
+    {
+        remake_file(splash_bottom_path, ArchiveSD, bottom_size);
+        buf_to_file(bottom_size, splash_bottom_path, ArchiveSD, bottom_buf);
+    }
+
+    res = (Result)asprintf(&smdh_path, "%s/info.smdh", folder_path);
+    if(res == -1) goto end;
+
+    Icon_s smdh = {0};
+    struacat(smdh.name, "Dumped splash");
+    struacat(smdh.author, "Unkown author");
+    struacat(smdh.desc, smdh_desc);
+
+    u32 color = RGB565(rand() % 255, rand() % 255, rand() % 255);
+    for(int i = 0; i < 48*48; i++)
+    {
+        smdh.big_icon[i] = color;
+    }
+
+    remake_file(smdh_path, ArchiveSD, sizeof(Icon_s));
+    buf_to_file(sizeof(Icon_s), smdh_path, ArchiveSD, (char*)&smdh);
+
+    res = 0;
+
+    end:
+    free(folder_path);
+    free(splash_top_path);
+    free(splash_bottom_path);
+    free(smdh_path);
+    free(smdh_desc);
+    free(top_buf);
+    free(bottom_buf);
+
+    return res;
+}
+
 void splash_check_installed(void * void_arg)
 {
     Thread_Arg_s * arg = (Thread_Arg_s *)void_arg;
