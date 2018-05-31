@@ -29,6 +29,7 @@
 #include "common.h"
 #include "fs.h"
 #include "draw.h"
+#include "colors.h"
 
 // note: see impl; param <= 11 means system language
 void i18n_set(u8 language);

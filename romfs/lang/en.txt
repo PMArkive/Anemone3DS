@@ -1,3 +1,8 @@
+|||| All lines beginning with '|' are comment lines, and can be safely removed
+||| Text objects - translate these exactly
+||| #<c> represents the same console button as <c>, except:
+||| #S -> START/SELECT
+||| #Du, #Dd, #Dl, #Dr, #Dn -> D-pad up, down, left, right, neutral
 Loading themes, please wait...
 Loading splashes, please wait...
 Loading icons, please wait...
@@ -18,17 +23,62 @@ Theme mode
 Splash mode
 No theme found
 No splash found
-Press \uE005 to download from QR
-Or \uE004 to switch to splashes
-Or \uE004 to switch to themes
-Or        to quit
+Press #R to download from QR
+Or #L to switch to splashes
+Or #L to switch to themes
+Or #S to quit
+| Trailing space after By
 By 
 Selected:
+| Abbreviation for above
 Sel.:
 ThemePlaza Theme mode
 ThemePlaza Splash mode
 Search...
 Page:
-Press \uE000 to quit.
-Press \uE000 to continue.
-\uE000 Yes   \uE001 No
+Press #A to quit.
+Press #A to continue.
+#A Yes   #B No
+||| Instructions - leave all Unicode codepoints
+Exit
+|| Normal instructions
+| Theme mode
+#A Hold to install
+#B Queue shuffle theme
+#X Hold for more
+#Y Preview theme
+#L Switch to splashes
+#R Scan QR code
+Delete from SD
+| Splash mode
+#A Install splash
+#B Delete installed splash
+#X Hold for more
+#Y Preview splash
+#L Switch to themes
+#R Scan QR code
+Delete from SD
+|| Installation
+| Info line
+Release #A to cancel or hold #Dn and release #A to install
+| Instructions
+#Du Normal install
+#Dd Shuffle install
+#Dl BGM-only install
+#Dr No-BGM install
+|| Extra instructions
+|| Set 1
+| Info line
+Release #X to cancel or hold #Dn and release #X to sort
+| Instructions
+#Du Sort by name
+#Dd Sort by author
+#Dl Sort by filename
+|| Set 2
+| Info line
+Release #X to cancel or hold #Dn and release #X to execute
+| Instructions
+#Du Jump in the list
+#Dd Reload broken icons
+#Dl Browse ThemePlaza
+#L Sorting menu
