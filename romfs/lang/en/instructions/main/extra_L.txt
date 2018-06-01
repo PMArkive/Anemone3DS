@@ -1,0 +1,10 @@
+| Info line
+Release #X to cancel or hold #Dn and release #X to sort
+| Key instructions
+#Du Sort by name
+#Dd Sort by author
+#Dl Sort by filename
+
+
+
+

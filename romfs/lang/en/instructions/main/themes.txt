@@ -1,0 +1,12 @@
+| Theme mode
+| Info line
+
+| Key instructions
+#A Hold to install
+#B Queue shuffle theme
+#X Hold for more
+#Y Preview theme
+#L Switch to splashes
+#R Scan QR code
+Exit
+Delete from SD

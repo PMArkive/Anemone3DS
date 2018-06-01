@@ -278,17 +278,17 @@ void update_qr(qr_data *data)
                     }
                     else
                     {
-                        throw_error("Zip downloaded is neither\na splash nor a theme.", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_DOWNLOADED_NOT_SPLASH_THEME, ERROR_LEVEL_WARNING);
                     }
                 }
                 else
                 {
-                    throw_error("File downloaded isn't a zip.", ERROR_LEVEL_WARNING);
+                    throw_error(ERROR_TYPE_DOWNLOADED_NOT_ZIP, ERROR_LEVEL_WARNING);
                 }
             }
             else
             {
-                throw_error("Download failed.", ERROR_LEVEL_WARNING);
+                throw_error(ERROR_TYPE_DOWNLOAD_FAILED, ERROR_LEVEL_WARNING);
             }
 
             free(filename);

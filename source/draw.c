@@ -226,7 +226,7 @@ void draw_base_interface(void)
     set_screen(top);
 }
 
-void throw_error(char* error, ErrorLevel level)
+void throw_error(ErrorType error, ErrorLevel level)
 {
     Text bottom_text = TEXT_AMOUNT;
     Color text_color = COLOR_WHITE;
@@ -251,7 +251,11 @@ void throw_error(char* error, ErrorLevel level)
         u32 kDown = hidKeysDown();
 
         draw_base_interface();
-        draw_text_center(GFX_TOP, 100, 0.5f, 0.6f, 0.6f, colors[text_color], error);
+        if(error != ERROR_TYPE_NONE)
+        {
+            C2D_Text * error_text = &text[TEXT_ERRORS_START + error];
+            draw_c2d_text_center(GFX_TOP, 100, 0.5f, 0.6f, 0.6f, colors[text_color], error_text);
+        }
         draw_c2d_text_center(GFX_TOP, 150, 0.5f, 0.6f, 0.6f, colors[COLOR_WHITE], &text[bottom_text]);
         end_frame();
 
@@ -259,14 +263,15 @@ void throw_error(char* error, ErrorLevel level)
     }
 }
 
-bool draw_confirm(const char* conf_msg, Entry_List_s* list)
+bool draw_confirm(ConfirmType type, Entry_List_s* list)
 {
+    C2D_Text * confirm_text = &text[TEXT_CONFIRMS_START + type];
     while(aptMainLoop())
     {
         Instructions_s instructions = {0};
         draw_interface(list, instructions);
         set_screen(top);
-        draw_text_center(GFX_TOP, BUTTONS_Y_LINE_1, 0.5f, 0.7f, 0.7f, colors[COLOR_YELLOW], conf_msg);
+        draw_c2d_text_center(GFX_TOP, BUTTONS_Y_LINE_1, 0.5f, 0.7f, 0.7f, colors[COLOR_YELLOW], confirm_text);
         draw_c2d_text_center(GFX_TOP, BUTTONS_Y_LINE_3, 0.5f, 0.6f, 0.6f, colors[COLOR_WHITE], &text[TEXT_CONFIRM_YES_NO]);
         end_frame();
 
@@ -292,7 +297,7 @@ static void draw_install_handler(InstallType type)
 {
     if(type != INSTALL_NONE)
     {
-        C2D_Text * install_text = &text[type];
+        C2D_Text * install_text = &text[TEXT_INSTALLS_START + type];
         draw_c2d_text_center(GFX_TOP, 120.0f, 0.5f, 0.8f, 0.8f, colors[COLOR_WHITE], install_text);
     }
 }

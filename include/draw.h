@@ -60,8 +60,47 @@ typedef enum {
 } InstallType;
 
 typedef enum {
+    ERROR_TYPE_NO_THEME_EXTDATA,
+
+    ERROR_TYPE_NO_WIFI_QR,
+    ERROR_TYPE_NO_QR_HBL,
+    ERROR_TYPE_OTHER_QR_ERROR,
+
+    ERROR_TYPE_DOWNLOADED_NOT_SPLASH_THEME,
+    ERROR_TYPE_DOWNLOADED_NOT_ZIP,
+    ERROR_TYPE_DOWNLOAD_FAILED,
+
+    ERROR_TYPE_INVALID_PREVIEW_PNG,
+    ERROR_TYPE_NO_PREVIEW,
+
+    ERROR_TYPE_SHUFFLE_NOT_ENOUGH,
+    ERROR_TYPE_SHUFFLE_TOO_MANY,
+
+    ERROR_TYPE_THEMEPLAZA_COULDNT_LOAD,
+    ERROR_TYPE_THEMEPLAZA_NO_RESULT,
+
+    ERROR_TYPE_TARGET_NOT_VALID,
+
+    ERROR_TYPE_SPLASH_WRONG,
+    ERROR_TYPE_SPLASH_LUMA_DISABLED,
+
+    ERROR_TYPE_THEME_NO_BODY,
+
+    ERROR_TYPE_NONE,
+} ErrorType;
+
+typedef enum {
+    CONFIRM_DELETE_INSTALLED_SPLASH,
+    CONFIRM_DELETE_SELECTED_ENTRY,
+
+    CONFIRM_NONE,
+} ConfirmType;
+
+typedef enum {
     // InstallType text
-    TEXT_INSTALL_LOADING_THEMES,
+    TEXT_INSTALLS_START, // indicator
+
+    TEXT_INSTALL_LOADING_THEMES = TEXT_INSTALLS_START,
     TEXT_INSTALL_LOADING_SPLASHES,
     TEXT_INSTALL_LOADING_ICONS,
 
@@ -82,8 +121,51 @@ typedef enum {
     TEXT_INSTALL_LOADING_REMOTE_PREVIEW,
     TEXT_INSTALL_LOADING_REMOTE_BGM,
 
+    TEXT_INSTALLS_END, // indicator
+
+    // ErrorType text
+    TEXT_ERRORS_START = TEXT_INSTALLS_END, // indicator
+
+    TEXT_ERROR_TYPE_NO_THEME_EXTDATA = TEXT_ERRORS_START,
+
+    TEXT_ERROR_TYPE_NO_WIFI_QR,
+    TEXT_ERROR_TYPE_NO_QR_HBL,
+    TEXT_ERROR_TYPE_OTHER_QR_ERROR,
+
+    TEXT_ERROR_TYPE_DOWNLOADED_NOT_SPLASH_THEME,
+    TEXT_ERROR_TYPE_DOWNLOADED_NOT_ZIP,
+    TEXT_ERROR_TYPE_DOWNLOAD_FAILED,
+
+    TEXT_ERROR_TYPE_INVALID_PREVIEW_PNG,
+    TEXT_ERROR_TYPE_NO_PREVIEW,
+
+    TEXT_ERROR_TYPE_SHUFFLE_NOT_ENOUGH,
+    TEXT_ERROR_TYPE_SHUFFLE_TOO_MANY,
+
+    TEXT_ERROR_TYPE_THEMEPLAZA_COULDNT_LOAD,
+    TEXT_ERROR_TYPE_THEMEPLAZA_NO_RESULT,
+
+    TEXT_ERROR_TYPE_TARGET_NOT_VALID,
+
+    TEXT_ERROR_TYPE_SPLASH_WRONG,
+    TEXT_ERROR_TYPE_SPLASH_LUMA_DISABLED,
+
+    TEXT_ERROR_TYPE_THEME_NO_BODY,
+
+    TEXT_ERRORS_END, // indicator
+
+    // ConfirmType text
+    TEXT_CONFIRMS_START = TEXT_ERRORS_END,
+
+    TEXT_CONFIRM_DELETE_INSTALLED_SPLASH = TEXT_CONFIRMS_START,
+    TEXT_CONFIRM_DELETE_SELECTED_ENTRY,
+
+    TEXT_CONFIRMS_END,
+
     // Other text
-    TEXT_THEME_MODE,
+    TEXT_NORMAL_START = TEXT_CONFIRMS_END, // indicator
+
+    TEXT_THEME_MODE = TEXT_NORMAL_START,
     TEXT_SPLASH_MODE,
 
     TEXT_NO_THEME_FOUND,
@@ -111,7 +193,9 @@ typedef enum {
 
     TEXT_CONFIRM_YES_NO,
 
-    TEXT_VERSION,
+    TEXT_NORMAL_END, // indicator
+
+    TEXT_VERSION = TEXT_NORMAL_END,
 
     TEXT_AMOUNT
 } Text;
@@ -157,12 +241,11 @@ void start_frame(void);
 void end_frame(void);
 void set_screen(C3D_RenderTarget * screen);
 
-void throw_error(char* error, ErrorLevel level);
-bool draw_confirm(const char* conf_msg, Entry_List_s* list);
-
 void draw_preview(C2D_Image preview, int preview_offset);
 
 void draw_install(InstallType type);
+void throw_error(ErrorType error, ErrorLevel level);
+bool draw_confirm(ConfirmType type, Entry_List_s* list);
 void draw_loading_bar(u32 current, u32 max, InstallType type);
 
 void draw_text(float x, float y, float z, float scaleX, float scaleY, Color color, const char * text);

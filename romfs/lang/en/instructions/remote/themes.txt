@@ -1,0 +1,11 @@
+| Theme mode
+| Info line
+
+| Key instructions
+#A Download theme
+#B Go back
+#X Hold for more
+#Y Preview theme
+#L Previous page
+#R Next page
+Exit

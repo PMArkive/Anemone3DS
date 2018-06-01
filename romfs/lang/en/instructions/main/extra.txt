@@ -1,0 +1,10 @@
+| Info line
+Release #X to cancel or hold #Dn and release #X to execute
+| Key instructions
+#Du Jump in the list
+#Dd Reload broken icons
+#Dl Browse ThemePlaza
+
+#L Sorting menu
+
+

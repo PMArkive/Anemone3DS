@@ -25,6 +25,19 @@
 */
 
 #include "i18n.h"
+#include "fs.h"
+#include "draw.h"
+#include "colors.h"
+
+#include "instructions.h"
+
+Instructions_s normal_instructions[MODE_AMOUNT] = {0};
+Instructions_s install_instructions = {0};
+Instructions_s extra_instructions[3] = {0};
+
+Instructions_s remote_instructions[MODE_AMOUNT] = {0};
+Instructions_s remote_extra_instructions = {0};
+
 //TODO MAKE THIS WORK
 #define BUFFER_LENGTH 128
 
@@ -34,32 +47,19 @@ void i18n_strings(void);
 // Reads in lines until not a comment, then returns silently
 inline void parse_next_line(FILE* file, char* buffer);
 
-void i18n_set(u8 language)
+void i18n_load_text(const char * filename, int starti, int endi)
 {
-    FILE* file;
-    char text_buf[BUFFER_LENGTH];
-    char filename[19] = "romfs:/lang/"; // 19 = length of "romfs:/lang/cc.txt" + NULL
-
-    switch(language)
-    {
-        case CFG_LANGUAGE_EN:
-        default:
-            strcat(filename, "en.txt");
-    }
-
-    file = fopen(filename, "r");
+    FILE* file = fopen(filename, "r");
     if(file == NULL)
     {
         DEBUG("%s missing\n", filename);
         return;
     }
 
+    char text_buf[BUFFER_LENGTH];
     // Static C2D_Text objects using the Text enum
-    for(int i = 0; i < TEXT_AMOUNT; i++)
+    for(int i = starti; i != endi; i++)
     {
-        if(i == TEXT_VERSION)
-            continue;
-
         parse_next_line(file, text_buf);
 
         text_buf[strlen(text_buf) - 1] = '\0'; // set \n to null char
@@ -69,6 +69,32 @@ void i18n_set(u8 language)
 
     if(fclose(file) != 0)
         DEBUG("Error closing %s", filename);
+}
+
+void i18n_set(u8 language)
+{
+    char base_folder[15] = "romfs:/lang/"; // 15 = length of "romfs:/lang/cc" + NULL
+
+    switch(language)
+    {
+        case CFG_LANGUAGE_EN:
+        default:
+            strcat(base_folder, "en");
+    }
+
+    DEBUG("TEXT_AMOUNT: %i\n", TEXT_AMOUNT);
+    char filename[30];
+    sprintf(filename, "%s/%s", base_folder, "installs.txt");
+    i18n_load_text(filename, TEXT_INSTALLS_START, TEXT_INSTALLS_END);
+
+    sprintf(filename, "%s/%s", base_folder, "errors.txt");
+    i18n_load_text(filename, TEXT_ERRORS_START, TEXT_ERRORS_END);
+
+    sprintf(filename, "%s/%s", base_folder, "confirm.txt");
+    i18n_load_text(filename, TEXT_CONFIRMS_START, TEXT_CONFIRMS_END);
+
+    sprintf(filename, "%s/%s", base_folder, "text.txt");
+    i18n_load_text(filename, TEXT_NORMAL_START, TEXT_NORMAL_END);
 }
 
 inline void parse_next_line(FILE* file, char* buffer)
@@ -93,6 +119,9 @@ inline void parse_next_line(FILE* file, char* buffer)
             char next = *(++temp);
             switch(next)
             {
+                case 'n':
+                    to_append = "\n";
+                    break;
                 case 'A':
                     to_append = "\uE000";
                     break;

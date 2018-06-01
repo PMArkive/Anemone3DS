@@ -54,7 +54,7 @@ void splash_install(Entry_s splash)
 
     if(size == 0 && bottom_size == 0)
     {
-        throw_error("No splash.bin or splashbottom.bin found.\nIs this a splash?", ERROR_LEVEL_WARNING);
+        throw_error(ERROR_TYPE_SPLASH_WRONG, ERROR_LEVEL_WARNING);
     }
     else
     {
@@ -65,7 +65,7 @@ void splash_install(Entry_s splash)
             if(config_buf[0xC] == 0)
             {
                 free(config_buf);
-                throw_error("WARNING: Splashes are disabled in Luma Config", ERROR_LEVEL_WARNING);
+                throw_error(ERROR_TYPE_SPLASH_LUMA_DISABLED, ERROR_LEVEL_WARNING);
             }
         }
     }

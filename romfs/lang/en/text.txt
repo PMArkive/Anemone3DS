@@ -1,0 +1,26 @@
+|||| All lines beginning with '|' are comment lines, and can be safely removed
+||| Text objects - translate these exactly
+||| #n represents a newline
+||| #<c> represents the same console button as <c>, except:
+||| #S -> START/SELECT
+||| #Du, #Dd, #Dl, #Dr, #Dn -> D-pad up, down, left, right, neutral
+Theme mode
+Splash mode
+No theme found
+No splash found
+Press #R to download from QR
+Or #L to switch to splashes
+Or #L to switch to themes
+Or #S to quit
+| Trailing space after By
+By 
+Selected:
+| Abbreviation for above
+Sel.:
+ThemePlaza Theme mode
+ThemePlaza Splash mode
+Search...
+Page:
+Press #A to quit.
+Press #A to continue.
+#A Yes   #B No

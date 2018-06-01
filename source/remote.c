@@ -29,73 +29,7 @@
 #include "fs.h"
 #include "unicode.h"
 #include "music.h"
-
-static Instructions_s browser_instructions[MODE_AMOUNT] = {
-    {
-        .info_line = NULL,
-        .instructions = {
-            {
-                "\uE000 Download theme",
-                "\uE001 Go back"
-            },
-            {
-                "\uE002 Hold for more",
-                "\uE003 Preview theme"
-            },
-            {
-                "\uE004 Previous page",
-                "\uE005 Next page"
-            },
-            {
-                "Exit",
-                NULL
-            }
-        }
-    },
-    {
-        .info_line = NULL,
-        .instructions = {
-            {
-                "\uE000 Download splash",
-                "\uE001 Go back"
-            },
-            {
-                "\uE002 Hold for more",
-                "\uE003 Preview splash"
-            },
-            {
-                "\uE004 Previous page",
-                "\uE005 Next page"
-            },
-            {
-                "Exit",
-                NULL
-            }
-        }
-    }
-};
-
-static Instructions_s extra_instructions = {
-    .info_line = "Release \uE002 to cancel or hold \uE006 and release \uE002 to do stuff",
-    .instructions = {
-        {
-            "\uE079 Jump to page",
-            "\uE07A Search tags"
-        },
-        {
-            "\uE07B Toggle splash/theme",
-            "\uE07C Reload without cache"
-        },
-        {
-            NULL,
-            NULL
-        },
-        {
-            "Exit",
-            NULL
-        }
-    }
-};
+#include "instructions.h"
 
 static void free_icons(Entry_List_s * list)
 {
@@ -227,7 +161,7 @@ static void load_remote_list(Entry_List_s * list, json_int_t page, EntryMode mod
                 else if(json_is_array(value) && !strcmp(key, THEMEPLAZA_JSON_PAGE_IDS))
                     load_remote_entries(list, value, ignore_cache, loading_screen);
                 else if(json_is_string(value) && !strcmp(key, THEMEPLAZA_JSON_ERROR_MESSAGE) && !strcmp(json_string_value(value), THEMEPLAZA_JSON_ERROR_MESSAGE_NOT_FOUND))
-                    throw_error("No results for this search.", ERROR_LEVEL_WARNING);
+                    throw_error(ERROR_TYPE_THEMEPLAZA_NO_RESULT, ERROR_LEVEL_WARNING);
             }
         }
         else
@@ -236,7 +170,7 @@ static void load_remote_list(Entry_List_s * list, json_int_t page, EntryMode mod
         json_decref(root);
     }
     else
-        throw_error("Couldn't download ThemePlaza data.\nMake sure WiFi is on.", ERROR_LEVEL_WARNING);
+        throw_error(ERROR_TYPE_THEMEPLAZA_COULDNT_LOAD, ERROR_LEVEL_WARNING);
 
     free(page_json);
 }
@@ -477,9 +411,9 @@ bool themeplaza_browser(EntryMode mode)
         }
         else
         {
-            Instructions_s instructions = browser_instructions[mode];
+            Instructions_s instructions = remote_instructions[mode];
             if(extra_mode)
-                instructions = extra_instructions;
+                instructions = remote_extra_instructions;
             draw_grid_interface(current_list, instructions);
         }
         end_frame();
@@ -815,7 +749,7 @@ u32 http_get(const char *url, char ** filename, char ** buf, InstallType install
             free(content_disposition);
             free(new_url);
             free(*buf);
-            throw_error("Target is not valid!", ERROR_LEVEL_WARNING);
+            throw_error(ERROR_TYPE_TARGET_NOT_VALID, ERROR_LEVEL_WARNING);
             DEBUG("filename\n");
             return 0;
         }

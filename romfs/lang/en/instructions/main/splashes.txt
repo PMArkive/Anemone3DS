@@ -1,0 +1,12 @@
+| Splash mode
+| Info line
+
+| Key instructions
+#A Install splash
+#B Delete installed splash
+#X Hold for more
+#Y Preview splash
+#L Switch to themes
+#R Scan QR code
+Exit
+Delete from SD

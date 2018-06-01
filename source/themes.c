@@ -80,7 +80,7 @@ static Result install_theme_internal(Entry_List_s themes, int installmode)
                     {
                         free(body);
                         DEBUG("body not found\n");
-                        throw_error("No body_LZ.bin found - is this a theme?", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_THEME_NO_BODY, ERROR_LEVEL_WARNING);
                         return MAKERESULT(RL_PERMANENT, RS_CANCELED, RM_APPLICATION, RD_NOT_FOUND);
                     }
 
@@ -171,7 +171,7 @@ static Result install_theme_internal(Entry_List_s themes, int installmode)
             {
                 free(body);
                 DEBUG("body not found\n");
-                throw_error("No body_LZ.bin found - is this a theme?", ERROR_LEVEL_WARNING);
+                throw_error(ERROR_TYPE_THEME_NO_BODY, ERROR_LEVEL_WARNING);
                 return MAKERESULT(RL_PERMANENT, RS_CANCELED, RM_APPLICATION, RD_NOT_FOUND);
             }
 

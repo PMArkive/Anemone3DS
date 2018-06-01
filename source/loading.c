@@ -446,7 +446,7 @@ bool load_preview_from_buffer(void * buf, u32 size, C2D_Image * preview_image, i
 {
     if(size < 8 || png_sig_cmp(buf, 0, 8))
     {
-        throw_error("Invalid preview.png", ERROR_LEVEL_WARNING);
+        throw_error(ERROR_TYPE_INVALID_PREVIEW_PNG, ERROR_LEVEL_WARNING);
         return false;
     }
 
@@ -562,7 +562,7 @@ bool load_preview(Entry_List_s list, C2D_Image * preview_image, int * preview_of
     if(!size)
     {
         free(preview_buffer);
-        throw_error("No preview found.", ERROR_LEVEL_WARNING);
+        throw_error(ERROR_TYPE_NO_PREVIEW, ERROR_LEVEL_WARNING);
         return false;
     }
 

@@ -1,0 +1,10 @@
+| Info line
+Release #A to cancel or hold #Dn and release #A to install
+| Key instructions
+#Du Normal install
+#Dd Shuffle install
+#Dl BGM-only install
+#Dr No-BGM install
+
+
+

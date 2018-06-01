@@ -28,118 +28,12 @@
 #define INSTRUCTIONS_H
 
 #include "draw.h"
-#include "colors.h"
 
-Instructions_s normal_instructions[MODE_AMOUNT] = {
-    {
-        .info_line = NULL,
-        .instructions = {
-            {
-                "\uE000 Hold to install",
-                "\uE001 Queue shuffle theme"
-            },
-            {
-                "\uE002 Hold for more",
-                "\uE003 Preview theme"
-            },
-            {
-                "\uE004 Switch to splashes",
-                "\uE005 Scan QR code"
-            },
-            {
-                "Exit",
-                "Delete from SD"
-            }
-        }
-    },
-    {
-        .info_line = NULL,
-        .instructions = {
-            {
-                "\uE000 Install splash",
-                "\uE001 Delete installed splash"
-            },
-            {
-                "\uE002 Hold for more",
-                "\uE003 Preview splash"
-            },
-            {
-                "\uE004 Switch to themes",
-                "\uE005 Scan QR code"
-            },
-            {
-                "Exit",
-                "Delete from SD"
-            }
-        }
-    }
-};
+extern Instructions_s normal_instructions[MODE_AMOUNT];
+extern Instructions_s install_instructions;
+extern Instructions_s extra_instructions[3];
 
-Instructions_s install_instructions = {
-    .info_line = "Release \uE000 to cancel or hold \uE006 and release \uE000 to install",
-    .instructions = {
-        {
-            "\uE079 Normal install",
-            "\uE07A Shuffle install"
-        },
-        {
-            "\uE07B BGM-only install",
-            "\uE07C No-BGM install"
-        },
-        {
-            NULL,
-            NULL
-        },
-        {
-            "Exit",
-            NULL
-        }
-    }
-};
-
-Instructions_s extra_instructions[3] = {
-    {
-        .info_line = "Release \uE002 to cancel or hold \uE006 and release \uE002 to sort",
-        .instructions = {
-            {
-                "\uE079 Sort by name",
-                "\uE07A Sort by author"
-            },
-            {
-                "\uE07B Sort by filename",
-                NULL
-            },
-            {
-                NULL,
-                NULL
-            },
-            {
-                "Exit",
-                NULL
-            }
-        }
-    },
-    {
-        .info_line = "Release \uE002 to cancel or hold \uE006 and release \uE002 to do stuff",
-        .instructions = {
-            {
-                "\uE079 Jump in the list",
-                "\uE07A Reload broken icons"
-            },
-            {
-                "\uE07B Browse ThemePlaza",
-                NULL,
-            },
-            {
-                "\uE004 Sorting menu",
-                NULL
-            },
-            {
-                "Exit",
-                NULL
-            }
-        }
-    },
-};
+extern Instructions_s remote_instructions[MODE_AMOUNT];
+extern Instructions_s remote_extra_instructions;
 
 #endif

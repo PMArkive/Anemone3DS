@@ -374,7 +374,7 @@ int main(void)
         #ifndef CITRA_MODE
         if(R_FAILED(archive_result) && current_mode == MODE_THEMES)
         {
-            throw_error("Theme extdata does not exist!\nSet a default theme from the home menu.", ERROR_LEVEL_ERROR);
+            throw_error(ERROR_TYPE_NO_THEME_EXTDATA, ERROR_LEVEL_ERROR);
             quit = true;
             continue;
         }
@@ -462,15 +462,15 @@ int main(void)
                     }
                     else
                     {
-                        throw_error("Please connect to Wi-Fi before scanning QR codes", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_NO_WIFI_QR, ERROR_LEVEL_WARNING);
                     }
                 }
                 else
                 {
                     if(homebrew)
-                        throw_error("QR scanning doesnt work from the Homebrew\nLauncher, use the ThemePlaza browser instead.", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_NO_QR_HBL, ERROR_LEVEL_WARNING);
                     else
-                        throw_error("Your camera seems to have a problem,\nunable to scan QR codes.", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_OTHER_QR_ERROR, ERROR_LEVEL_WARNING);
                 }
 
                 continue;
@@ -578,11 +578,11 @@ int main(void)
                 {
                     if(current_list->shuffle_count > MAX_SHUFFLE_THEMES)
                     {
-                        throw_error("You have too many themes selected.", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_SHUFFLE_TOO_MANY, ERROR_LEVEL_WARNING);
                     }
                     else if(current_list->shuffle_count < 2)
                     {
-                        throw_error("You don't have enough themes selected.", ERROR_LEVEL_WARNING);
+                        throw_error(ERROR_TYPE_SHUFFLE_NOT_ENOUGH, ERROR_LEVEL_WARNING);
                     }
                     else
                     {
@@ -689,7 +689,7 @@ int main(void)
                     toggle_shuffle(current_list);
                     break;
                 case MODE_SPLASHES:
-                    if(draw_confirm("Are you sure you would like to delete\nthe installed splash?", current_list))
+                    if(draw_confirm(CONFIRM_DELETE_INSTALLED_SPLASH, current_list))
                     {
                         draw_install(INSTALL_SPLASH_DELETE);
                         splash_delete();
@@ -705,7 +705,7 @@ int main(void)
         }
         else if(kDown & KEY_SELECT)
         {
-            if(draw_confirm("Are you sure you would like to delete this?", current_list))
+            if(draw_confirm(CONFIRM_DELETE_SELECTED_ENTRY, current_list))
             {
                 draw_install(INSTALL_ENTRY_DELETE);
                 delete_entry(current_entry, current_entry->is_zip);

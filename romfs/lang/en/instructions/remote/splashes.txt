@@ -1,0 +1,11 @@
+| Splash mode
+| Info line
+
+| Key instructions
+#A Download splash
+#B Go back
+#X Hold for more
+#Y Preview splash
+#L Previous page
+#R Next page
+Exit
