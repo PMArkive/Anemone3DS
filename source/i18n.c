@@ -41,13 +41,75 @@ Instructions_s remote_extra_instructions = {0};
 //TODO MAKE THIS WORK
 #define BUFFER_LENGTH 128
 
-void i18n_instructions(void);
+// Reads in lines until not a comment, then returns silently
+static inline void parse_next_line(FILE* file, char* buffer);
+
+static void i18n_instructions_line(const char ** line, FILE * file, char * text_buf)
+{
+    parse_next_line(file, text_buf);
+    text_buf[strlen(text_buf) - 1] = '\0'; // set \n to null char
+    if(strlen(text_buf) != 0) // if the line is empty, leave it to NULL
+    {
+        *line = strdup(text_buf);
+    }
+}
+
+static void i18n_instructions(Instructions_s * instructions, const char * filename)
+{
+    FILE* file = fopen(filename, "r");
+    if(file == NULL)
+    {
+        DEBUG("%s missing\n", filename);
+        return;
+    }
+
+    char text_buf[BUFFER_LENGTH];
+    i18n_instructions_line(&instructions->info_line, file, text_buf);
+
+    for(int i = 0; i < BUTTONS_INFO_LINES; i++)
+    {
+        i18n_instructions_line(&instructions->instructions[i][0], file, text_buf);
+        i18n_instructions_line(&instructions->instructions[i][1], file, text_buf);
+    }
+
+    if(fclose(file) != 0)
+        DEBUG("Error closing %s", filename);
+}
+
+static void i18n_load_instructions(const char * base_folder)
+{
+    char filename[BUFFER_LENGTH];
+
+    // Main instructions
+    sprintf(filename, "%s/instructions/main/themes.txt", base_folder);
+    i18n_instructions(&normal_instructions[MODE_THEMES], filename);
+    sprintf(filename, "%s/instructions/main/splashes.txt", base_folder);
+    i18n_instructions(&normal_instructions[MODE_SPLASHES], filename);
+
+    // Install instructions
+    sprintf(filename, "%s/instructions/main/install.txt", base_folder);
+    i18n_instructions(&install_instructions, filename);
+
+    // Extra instructions
+    sprintf(filename, "%s/instructions/main/extra.txt", base_folder);
+    i18n_instructions(&extra_instructions[1], filename);
+    sprintf(filename, "%s/instructions/main/extra_L.txt", base_folder);
+    i18n_instructions(&extra_instructions[0], filename);
+    sprintf(filename, "%s/instructions/main/extra_R.txt", base_folder);
+    i18n_instructions(&extra_instructions[2], filename);
+
+    // Remote instructions
+    sprintf(filename, "%s/instructions/remote/themes.txt", base_folder);
+    i18n_instructions(&normal_instructions[MODE_THEMES], filename);
+    sprintf(filename, "%s/instructions/remote/splashes.txt", base_folder);
+    i18n_instructions(&normal_instructions[MODE_SPLASHES], filename);
+    sprintf(filename, "%s/instructions/remote/extra.txt", base_folder);
+    i18n_instructions(&remote_extra_instructions, filename);
+}
+
 void i18n_strings(void);
 
-// Reads in lines until not a comment, then returns silently
-inline void parse_next_line(FILE* file, char* buffer);
-
-void i18n_load_text(const char * filename, int starti, int endi)
+static void i18n_load_text(const char * filename, int starti, int endi)
 {
     FILE* file = fopen(filename, "r");
     if(file == NULL)
@@ -73,7 +135,7 @@ void i18n_load_text(const char * filename, int starti, int endi)
 
 void i18n_set(u8 language)
 {
-    char base_folder[15] = "romfs:/lang/"; // 15 = length of "romfs:/lang/cc" + NULL
+    char base_folder[12 + 2 + 1] = "romfs:/lang/"; // 15 = length of "romfs:/lang/cc" + NULL
 
     switch(language)
     {
@@ -83,7 +145,7 @@ void i18n_set(u8 language)
     }
 
     DEBUG("TEXT_AMOUNT: %i\n", TEXT_AMOUNT);
-    char filename[30];
+    char filename[12 + 2 + 1 + 12 + 1];
     sprintf(filename, "%s/%s", base_folder, "installs.txt");
     i18n_load_text(filename, TEXT_INSTALLS_START, TEXT_INSTALLS_END);
 
@@ -95,9 +157,11 @@ void i18n_set(u8 language)
 
     sprintf(filename, "%s/%s", base_folder, "text.txt");
     i18n_load_text(filename, TEXT_NORMAL_START, TEXT_NORMAL_END);
+
+    i18n_load_instructions(base_folder);
 }
 
-inline void parse_next_line(FILE* file, char* buffer)
+static inline void parse_next_line(FILE* file, char* buffer)
 {
     char* buf = calloc(BUFFER_LENGTH, sizeof(*buf));
     char* temp = buf; 
