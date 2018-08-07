@@ -539,7 +539,7 @@ int main(void)
                     break;
                 case MODE_BADGES:
                     draw_install(INSTALL_BADGE);
-                    badge_install(*current_entry);
+                    if(badge_install(*current_entry) == -1) throw_error("Badge extdata in use - restart your console, wait for\nthe home menu to load all badges, and try again.", ERROR_LEVEL_WARNING);
                 default:
                     break;
             }
