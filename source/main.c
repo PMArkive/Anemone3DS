@@ -708,7 +708,7 @@ int main(void)
                             splash->installed = false;
                     }
                     break;
-                case MODE_SPLASHES:
+                case MODE_BADGES:
                     draw_install(INSTALL_BADGE);
                     if(badge_install(*current_entry) == -1)
                         throw_error("Badge extdata in use - restart your console, wait for\nthe home menu to load all badges, and try again.", ERROR_LEVEL_WARNING);
