@@ -41,10 +41,6 @@ static C2D_SpriteSheet spritesheet;
 static C2D_Sprite sprite_shuffle, sprite_shuffle_no_bgm, sprite_installed, sprite_start, sprite_select;
 
 C2D_Text text[TEXT_AMOUNT];
-static const char * mode_switch_char[MODE_AMOUNT] = {
-    "S",
-    "T",
-};
 
 void init_screens(void)
 {
@@ -79,13 +75,16 @@ void init_screens(void)
 
     C2D_TextParse(&text[TEXT_THEME_MODE], staticBuf, "Theme mode");
     C2D_TextParse(&text[TEXT_SPLASH_MODE], staticBuf, "Splash mode");
+    C2D_TextParse(&text[TEXT_BADGE_MODE], staticBuf, "Bagdes mode");
 
     C2D_TextParse(&text[TEXT_NO_THEME_FOUND], staticBuf, "No theme found");
     C2D_TextParse(&text[TEXT_NO_SPLASH_FOUND], staticBuf, "No splash found");
+    C2D_TextParse(&text[TEXT_NO_BADGE_FOUND], staticBuf, "No badge found");
 
     C2D_TextParse(&text[TEXT_DOWNLOAD_FROM_QR], staticBuf, "Press \uE005 to download from QR");
 
     C2D_TextParse(&text[TEXT_SWITCH_TO_SPLASHES], staticBuf, "Or \uE004 to switch to splashes");
+    C2D_TextParse(&text[TEXT_SWITCH_TO_BADGES], staticBuf, "Or \uE004 to switch to badges");
     C2D_TextParse(&text[TEXT_SWITCH_TO_THEMES], staticBuf, "Or \uE004 to switch to themes");
 
     C2D_TextParse(&text[TEXT_OR_START_TO_QUIT], staticBuf, "Or        to quit");
@@ -107,7 +106,10 @@ void init_screens(void)
 
     C2D_TextParse(&text[TEXT_INSTALL_LOADING_THEMES], staticBuf, "Loading themes, please wait...");
     C2D_TextParse(&text[TEXT_INSTALL_LOADING_SPLASHES], staticBuf, "Loading splashes, please wait...");
+    C2D_TextParse(&text[TEXT_INSTALL_LOADING_BADGES], staticBuf, "Loading badges, please wait...");
     C2D_TextParse(&text[TEXT_INSTALL_LOADING_ICONS], staticBuf, "Loading icons, please wait...");
+
+    C2D_TextParse(&text[TEXT_INSTALL_BADGE], staticBuf, "Installing a badge...");
 
     C2D_TextParse(&text[TEXT_INSTALL_SPLASH], staticBuf, "Installing a splash...");
     C2D_TextParse(&text[TEXT_INSTALL_SPLASH_DELETE], staticBuf, "Deleting installed splash...");
@@ -528,7 +530,8 @@ void draw_grid_interface(Entry_List_s* list, Instructions_s instructions)
     draw_image(sprites_exit_idx, 320-72, 0);
     draw_image(sprites_preview_idx, 320-48, 0);
 
-    draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char[!current_mode]);
+    const char* mode_switch_char = current_mode == MODE_THEMES ? "S" : "T";
+    draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char);
 
     draw_image(sprites_arrow_left_idx, 3, 114);
     draw_image(sprites_arrow_right_idx, 308, 114);
@@ -595,15 +598,23 @@ void draw_interface(Entry_List_s* list, Instructions_s instructions)
     C2D_Text* mode_string[MODE_AMOUNT] = {
         &text[TEXT_THEME_MODE],
         &text[TEXT_SPLASH_MODE],
+        &text[TEXT_BADGE_MODE],
     };
 
     draw_c2d_text_center(GFX_TOP, 4, 0.5f, 0.5f, 0.5f, colors[COLOR_WHITE], mode_string[current_mode]);
+
+    static const char * mode_switch_char[MODE_AMOUNT] = {
+        "S",
+        "B",
+        "T",
+    };
 
     if(list->entries == NULL)
     {
         C2D_Text* mode_found_string[MODE_AMOUNT] = {
             &text[TEXT_NO_THEME_FOUND],
             &text[TEXT_NO_SPLASH_FOUND],
+            &text[TEXT_NO_BADGE_FOUND],
         };
 
         draw_c2d_text_center(GFX_TOP, 80, 0.5f, 0.7f, 0.7f, colors[COLOR_YELLOW], mode_found_string[current_mode]);
@@ -611,6 +622,7 @@ void draw_interface(Entry_List_s* list, Instructions_s instructions)
 
         C2D_Text* mode_switch_string[MODE_AMOUNT] = {
             &text[TEXT_SWITCH_TO_SPLASHES],
+            &text[TEXT_SWITCH_TO_BADGES],
             &text[TEXT_SWITCH_TO_THEMES],
         };
 
@@ -632,7 +644,7 @@ void draw_interface(Entry_List_s* list, Instructions_s instructions)
         draw_image(sprites_exit_idx, 320-72, 0);
         draw_image(sprites_preview_idx, 320-48, 0);
 
-        draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char[!current_mode]);
+        draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char[current_mode]);
 
         return;
     }
@@ -659,7 +671,7 @@ void draw_interface(Entry_List_s* list, Instructions_s instructions)
     draw_image(sprites_exit_idx, 320-72, 0);
     draw_image(sprites_preview_idx, 320-48, 0);
 
-    draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char[!current_mode]);
+    draw_text(320-24+2.5, -3, 0.6, 1.0f, 0.9f, colors[COLOR_WHITE], mode_switch_char[current_mode]);
 
     // Show arrows if there are themes out of bounds
     //----------------------------------------------------------------
