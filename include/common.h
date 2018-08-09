@@ -47,6 +47,7 @@
 typedef enum {
     MODE_THEMES = 0,
     MODE_SPLASHES,
+    MODE_BADGES,
 
     MODE_AMOUNT,
 } EntryMode;

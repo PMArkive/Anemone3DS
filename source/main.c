@@ -58,18 +58,22 @@ u32 old_time_limit;
 const char * main_paths[MODE_AMOUNT] = {
     "/Themes/",
     "/Splashes/",
+    "/Badges/",
 };
 const int entries_per_screen_v[MODE_AMOUNT] = {
     4,
     4,
+    3,
 };
 const int entries_per_screen_h[MODE_AMOUNT] = { //for themeplaza browser
     6,
     6,
+    5, // unused, browser doesn't support badges
 };
 const int entry_size[MODE_AMOUNT] = {
     48,
     48,
+    64,
 };
 
 static void init_services(void)
