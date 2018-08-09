@@ -64,9 +64,13 @@ C2D_Image * loadTextureIcon(Icon_s *icon)
 
     C2D_Image * image = calloc(1, sizeof(C2D_Image));
     C3D_Tex* tex = malloc(sizeof(C3D_Tex));
+
     static const Tex3DS_SubTexture subt3x = { 48, 48, 0.0f, 48/64.0f, 48/64.0f, 0.0f };
+    Tex3DS_SubTexture* subtex = malloc(sizeof(Tex3DS_SubTexture));
+    memcpy(subtex, &subt3x, sizeof(Tex3DS_SubTexture));
+
     image->tex = tex;
-    image->subtex = &subt3x;
+    image->subtex = subtex;
     C3D_TexInit(image->tex, 64, 64, GPU_RGB565);
 
     u16* dest = (u16*)image->tex->data + (64-48)*64;
@@ -112,6 +116,114 @@ static void parse_entry_smdh(Entry_s * entry, const u16 * fallback_name)
 
     parse_smdh(smdh, entry, fallback_name);
 }   
+
+static C2D_Image * load_badge_as_icon(Entry_s entry)
+{
+    char * badge_buf = NULL;
+    u32 size = load_data("", entry, &badge_buf);
+    if(!size) return NULL;
+
+    if(size < 8 || png_sig_cmp((u8*)badge_buf, 0, 8))
+    {
+        throw_error("Invalid preview.png", ERROR_LEVEL_WARNING);
+        return NULL;
+    }
+
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+    png_infop info = png_create_info_struct(png);
+
+    if(setjmp(png_jmpbuf(png)))
+    {
+        png_destroy_read_struct(&png, &info, NULL);
+        return false;
+    }
+
+    FILE * fp = fmemopen(badge_buf, size, "rb");
+
+    png_init_io(png, fp);
+    png_read_info(png, info);
+
+    int width = png_get_image_width(png, info);
+    int height = png_get_image_height(png, info);
+
+    png_byte color_type = png_get_color_type(png, info);
+    png_byte bit_depth  = png_get_bit_depth(png, info);
+
+    // Read any color_type into 8bit depth, ABGR format.
+    // See http://www.libpng.org/pub/png/libpng-manual.txt
+
+    if(bit_depth == 16)
+        png_set_strip_16(png);
+
+    if(color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_palette_to_rgb(png);
+
+    // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
+    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+        png_set_expand_gray_1_2_4_to_8(png);
+
+    if(png_get_valid(png, info, PNG_INFO_tRNS))
+        png_set_tRNS_to_alpha(png);
+
+    // These color_type don't have an alpha channel then fill it with 0xff.
+    if(color_type == PNG_COLOR_TYPE_RGB ||
+       color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+
+    if(color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+        png_set_gray_to_rgb(png);
+
+    //output ABGR
+    png_set_bgr(png);
+    png_set_swap_alpha(png);
+
+    png_read_update_info(png, info);
+
+    png_bytep * row_pointers = malloc(sizeof(png_bytep) * height);
+    for(int y = 0; y < height; y++) {
+        row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
+    }
+
+    png_read_image(png, row_pointers);
+
+    fclose(fp);
+    free(badge_buf);
+    png_destroy_read_struct(&png, &info, NULL);
+
+    C2D_Image* image = calloc(1, sizeof(C2D_Image));
+    C3D_Tex* tex = malloc(sizeof(C3D_Tex));
+    image->tex = tex;
+
+    Tex3DS_SubTexture * subt3x = malloc(sizeof(Tex3DS_SubTexture));
+    subt3x->width = width;
+    subt3x->height = height;
+    subt3x->left = 0.0f;
+    subt3x->top = 1.0f;
+    subt3x->right = 0.0f;
+    subt3x->bottom = 1.0f;
+    image->subtex = subt3x;
+
+    C3D_TexInit(image->tex, 64, 64, GPU_RGBA8);
+
+    memset(image->tex->data, 0, image->tex->size);
+
+    for(int j = 0; j < 64; j++) {
+        png_bytep row = row_pointers[j];
+        for(int i = 0; i < 64; i++) {
+            png_bytep px = &(row[i * 4]);
+            u32 dst = ((((j >> 3) * (64 >> 3) + (i >> 3)) << 6) + ((i & 1) | ((j & 1) << 1) | ((i & 2) << 1) | ((j & 2) << 2) | ((i & 4) << 2) | ((j & 4) << 3))) * 4;
+
+            memcpy(image->tex->data + dst, px, sizeof(u32));
+        }
+        free(row_pointers[j]);
+    }
+    free(row_pointers);
+
+    return image;
+}
 
 static C2D_Image * load_entry_icon(Entry_s entry)
 {
@@ -187,8 +299,16 @@ Result load_entries(const char * loading_path, Entry_List_s * list)
         if(R_FAILED(res) || entries_read == 0)
             break;
 
-        if(!(dir_entry.attributes & FS_ATTRIBUTE_DIRECTORY) && strcmp(dir_entry.shortExt, "ZIP")) 
-            continue;
+        if(list->mode == MODE_BADGES)
+        {
+            if(strncmp(dir_entry.shortExt, "PNG", 4))
+                continue;
+        }
+        else
+        {
+            if(!(dir_entry.attributes & FS_ATTRIBUTE_DIRECTORY) && strncmp(dir_entry.shortExt, "ZIP", 4))
+                continue;
+        }
 
         list->entries_count++;
         Entry_s * new_list = realloc(list->entries, list->entries_count * sizeof(Entry_s));
@@ -209,8 +329,19 @@ Result load_entries(const char * loading_path, Entry_List_s * list)
         struacat(current_entry->path, loading_path);
         strucat(current_entry->path, dir_entry.name);
 
-        current_entry->is_zip = !strcmp(dir_entry.shortExt, "ZIP");
-        parse_entry_smdh(current_entry, dir_entry.name);
+        if(list->mode == MODE_BADGES)
+        {
+            ssize_t dir_entry_name_len = strulen(dir_entry.name, 0x106);
+            memcpy(&current_entry->name, dir_entry.name, (dir_entry_name_len - 4)*sizeof(u16));
+            utf8_to_utf16(current_entry->desc, (u8*)"No description", 0x100);
+            utf8_to_utf16(current_entry->author, (u8*)"Unknown author", 0x80);
+            current_entry->is_zip = false;
+        }
+        else
+        {
+            current_entry->is_zip = !strncmp(dir_entry.shortExt, "ZIP", 4);
+            parse_entry_smdh(current_entry, dir_entry.name);
+        }
     }
 
     FSDIR_Close(dir_handle);
@@ -257,7 +388,10 @@ void load_icons_first(Entry_List_s * list, bool silent)
             offset -= list->entries_count;
 
         Entry_s current_entry = list->entries[offset];
-        icons[i-starti] = load_entry_icon(current_entry);
+        if(list->mode == MODE_BADGES)
+            icons[i-starti] = load_badge_as_icon(current_entry);
+        else
+            icons[i-starti] = load_entry_icon(current_entry);
     }
 }
 
@@ -410,7 +544,10 @@ static bool load_icons(Entry_List_s * current_list, Handle mutex)
         free(image->tex);
         free(image);
 
-        icons[index] = load_entry_icon(*current_entry);
+        if(current_list->mode == MODE_BADGES)
+            icons[index] = load_badge_as_icon(*current_entry);
+        else
+            icons[index] = load_entry_icon(*current_entry);
 
         if(!released && i > endi/2)
         {

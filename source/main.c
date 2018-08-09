@@ -138,6 +138,7 @@ static void free_icons(Entry_List_s * list)
     {
         C3D_TexDelete(list->icons[i]->tex);
         free(list->icons[i]->tex);
+        free((Tex3DS_SubTexture*)list->icons[i]->subtex);
         free(list->icons[i]);
     }
     free(list->icons);
