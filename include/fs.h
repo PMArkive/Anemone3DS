@@ -32,6 +32,10 @@
 FS_Archive ArchiveSD;
 FS_Archive ArchiveHomeExt;
 FS_Archive ArchiveThemeExt;
+FS_Archive ArchiveBadgeExt;
+
+Result themeResult;
+Result badgeResult;
 
 Result open_archives(void);
 Result close_archives(void);

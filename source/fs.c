@@ -38,11 +38,13 @@ Result open_archives(void)
     u8 regionCode;
     u32 archive1;
     u32 archive2;
+    u32 archiveBadge = 0x000014d1;
  
     Result res = 0;
  
     FS_Path home;
     FS_Path theme;
+    FS_Path badge;
  
     CFGU_SecureInfoGetRegion(&regionCode);
     switch(regionCode)
@@ -68,10 +70,11 @@ Result open_archives(void)
 
     FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/Themes"), FS_ATTRIBUTE_DIRECTORY);
     FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/Splashes"), FS_ATTRIBUTE_DIRECTORY);
+    FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/Badges"), FS_ATTRIBUTE_DIRECTORY);
     FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/3ds"), FS_ATTRIBUTE_DIRECTORY);
     FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/3ds/"  APP_TITLE), FS_ATTRIBUTE_DIRECTORY);
     FSUSER_CreateDirectory(ArchiveSD, fsMakePath(PATH_ASCII, "/3ds/"  APP_TITLE  "/cache"), FS_ATTRIBUTE_DIRECTORY);
- 
+
     u32 homeMenuPath[3] = {MEDIATYPE_SD, archive2, 0};
     home.type = PATH_BINARY;
     home.size = 0xC;
@@ -82,12 +85,14 @@ Result open_archives(void)
     theme.type = PATH_BINARY;
     theme.size = 0xC;
     theme.data = themePath;
-    if(R_FAILED(res = FSUSER_OpenArchive(&ArchiveThemeExt, ARCHIVE_EXTDATA, theme))) return res;
- 
-    Handle test_handle;
-    if(R_FAILED(res = FSUSER_OpenFile(&test_handle, ArchiveThemeExt, fsMakePath(PATH_ASCII, "/ThemeManage.bin"), FS_OPEN_READ, 0))) return res;
-    FSFILE_Close(test_handle);
- 
+    if(R_FAILED(themeResult = res = FSUSER_OpenArchive(&ArchiveThemeExt, ARCHIVE_EXTDATA, theme))) return res;
+
+    u32 badgePath[3] = {MEDIATYPE_SD, archiveBadge, 0};
+    badge.type = PATH_BINARY;
+    badge.size = 0xC;
+    badge.data = badgePath;
+    if(R_FAILED(badgeResult = res = FSUSER_OpenArchive(&ArchiveBadgeExt, ARCHIVE_EXTDATA, badge))) return res;
+
     return 0;
 }
 
@@ -98,10 +103,11 @@ Result close_archives(void)
     if(R_FAILED(res = FSUSER_CloseArchive(ArchiveSD))) return res;
     if(R_FAILED(res = FSUSER_CloseArchive(ArchiveHomeExt))) return res;
     if(R_FAILED(res = FSUSER_CloseArchive(ArchiveThemeExt))) return res;
+    if(R_FAILED(res = FSUSER_CloseArchive(ArchiveBadgeExt))) return res;
 
     return 0;
 }
- 
+
 u32 file_to_buf(FS_Path path, FS_Archive archive, char** buf)
 {
     Handle file;
