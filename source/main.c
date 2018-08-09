@@ -28,6 +28,7 @@
 #include "loading.h"
 #include "themes.h"
 #include "splashes.h"
+#include "badges.h"
 #include "draw.h"
 #include "camera.h"
 #include "music.h"
