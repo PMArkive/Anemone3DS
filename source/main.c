@@ -200,6 +200,8 @@ static void load_lists(Entry_List_s * lists)
             loading_screen = INSTALL_LOADING_THEMES;
         else if(i == MODE_SPLASHES)
             loading_screen = INSTALL_LOADING_SPLASHES;
+        else if(i == MODE_BADGES)
+            loading_screen = INSTALL_LOADING_BADGES;
 
         draw_install(loading_screen);
 
@@ -635,10 +637,13 @@ int main(void)
                     if((kDown | kHeld) & KEY_DLEFT)
                     {
                         browse_themeplaza:
-                        if(themeplaza_browser(current_mode))
+                        if(current_mode != MODE_BADGES)
                         {
-                            current_mode = MODE_THEMES;
-                            load_lists(lists);
+                            if(themeplaza_browser(current_mode))
+                            {
+                                current_mode = MODE_THEMES;
+                                load_lists(lists);
+                            }
                         }
                     }
                     else if((kDown | kHeld) & KEY_DUP)
@@ -666,7 +671,7 @@ int main(void)
                         sort_by_name(current_list);
                         load_icons_first(current_list, false);
                     }
-                    else if(((kDown | kHeld)) & KEY_DDOWN)
+                    else if(((kDown | kHeld)) & KEY_DDOWN && current_mode != MODE_BADGES)
                     {
                         sort_author:
                         sort_by_author(current_list);
@@ -697,6 +702,11 @@ int main(void)
                         else
                             splash->installed = false;
                     }
+                    break;
+                case MODE_SPLASHES:
+                    draw_install(INSTALL_BADGE);
+                    if(badge_install(*current_entry) == -1)
+                        throw_error("Badge extdata in use - restart your console, wait for\nthe home menu to load all badges, and try again.", ERROR_LEVEL_WARNING);
                     break;
                 default:
                     break;
@@ -803,7 +813,10 @@ int main(void)
                         switch(current_list->current_sort)
                         {
                             case SORT_NAME:
-                                goto sort_author;
+                                if(current_mode == MODE_BADGES)
+                                    goto sort_path;
+                                else
+                                    goto sort_author;
                                 break;
                             case SORT_AUTHOR:
                                 goto sort_path;
