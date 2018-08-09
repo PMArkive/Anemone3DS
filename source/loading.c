@@ -82,6 +82,10 @@ C2D_Image * loadTextureIcon(Icon_s *icon)
         dest += 64*8;
     }
 
+    C3D_TexSetFilter(image->tex, GPU_LINEAR, GPU_LINEAR);
+    image->tex->border = 0x00FFFFFF;
+    C3D_TexSetWrap(image->tex, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+
     return image;
 }
 
@@ -144,7 +148,6 @@ static C2D_Image * load_badge_as_icon(Entry_s entry)
     png_init_io(png, fp);
     png_read_info(png, info);
 
-    int width = png_get_image_width(png, info);
     int height = png_get_image_height(png, info);
 
     png_byte color_type = png_get_color_type(png, info);
@@ -198,8 +201,8 @@ static C2D_Image * load_badge_as_icon(Entry_s entry)
     image->tex = tex;
 
     Tex3DS_SubTexture * subt3x = malloc(sizeof(Tex3DS_SubTexture));
-    subt3x->width = width;
-    subt3x->height = height;
+    subt3x->width = 64;
+    subt3x->height = 64;
     subt3x->left = 0.0f;
     subt3x->top = 1.0f;
     subt3x->right = 0.0f;
@@ -221,6 +224,10 @@ static C2D_Image * load_badge_as_icon(Entry_s entry)
         free(row_pointers[j]);
     }
     free(row_pointers);
+
+    C3D_TexSetFilter(image->tex, GPU_LINEAR, GPU_LINEAR);
+    image->tex->border = 0x00FFFFFF;
+    C3D_TexSetWrap(image->tex, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
 
     return image;
 }
